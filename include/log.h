@@ -16,10 +16,7 @@ typedef struct {
 #define RESET   "\033[0m"
 
 
-#define lprontf(color,fmt,...)\
-        printf(color,fmt ,RESET);
-
- #define lprintf(color, fmt, ...) \
+#define lprintf(color, fmt, ...) \
     printf("%s" fmt "%s", color, ##__VA_ARGS__, RESET)
 
 #endif
