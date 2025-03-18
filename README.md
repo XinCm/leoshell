@@ -1,2 +1,2 @@
 # leoshell
-my shell
+use "make" to compile the entire project
