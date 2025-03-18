@@ -15,6 +15,10 @@ int cmd_builtin(char** _argv, int argc){
     if(argc == 2 && (strcmp(_argv[0],"cd") == 0)){
         chdir(_argv[1]);
         return 0;
+    } else if(strcmp(_argv[0],"export") == 0){
+        for(int i = 1; i < argc; i++){
+            putenv(_argv[i]);
+        }
     }
     return 0;
 }

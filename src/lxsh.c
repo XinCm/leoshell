@@ -9,10 +9,12 @@
 #include <stdbool.h>
 #include "log.h"
 #include "cmd.h"
+#include "readline.h"
+#include "history.h"
 #define DELIM " \t"
 #define DEBUG 0
 
-char command[1024];
+
 const char* builtin_cmd[]={".","..","alias","bg","bind","break","for","while","cd","source","export","history"};
 int split(char* str,char** _argv){
     int cnt = 0;
@@ -56,15 +58,18 @@ int cmd_handle(char** _argv, int argc){
 int main(void){
 
     char* _argv[256];
-
+    char *command;
     while(1){
         printf_host_name();
         fflush(stdout);   //强制刷新缓冲区
-        fgets(command,sizeof(command),stdin);
+        // fgets(command,sizeof(command),stdin);
+        command = readline(">> ");
+        if(!command) break;
+        add_history(command);
         int argc = split(command, _argv); //以空格切割输入字符
         if(!argc)
             continue;
-
         cmd_handle(_argv,argc);
+        free(command);
     }
 }

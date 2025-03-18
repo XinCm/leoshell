@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := all
 CC = gcc
 CFLAGS = -Wall -Iinclude 
-LDFLAGS = -lm
+LDFLAGS = -lm -lreadline -ltermcap
 
 
 SRC_DIR = ./src
