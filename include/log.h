@@ -11,7 +11,7 @@ typedef struct {
 #define BLUE    "\033[34m"
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
-#define PINK    "\033[35m"
+#define PINK    "\033[38;2;255;192;203m" //\033[35m
 #define BOLD    "\033[1m"
 #define RESET   "\033[0m"
 

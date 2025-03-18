@@ -33,7 +33,7 @@ int printf_host_name(void){
     char full_name[512];
     gethostname(host_name,sizeof(host_name));
     snprintf(full_name,sizeof(full_name),"%s@%s:%s",getenv("USER"),host_name,getcwd(NULL,0));
-    lprintf(BLUE,"%s ",full_name);
+    lprintf(PINK,"%s ",full_name);
     return 0;
 }
 bool string_exists(const char* list[], size_t length, const char* target) {
