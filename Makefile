@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := all
 CC = gcc
 CFLAGS = -Wall -Iinclude 
+CFLAGS += -I/usr/include
 LDFLAGS = -lm -lreadline -ltermcap
 
 

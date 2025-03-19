@@ -1,2 +1,4 @@
 # leoshell
-use "make" to compile the entire project
+STEP:
+1. sudo apt install libreadline-dev
+2. make

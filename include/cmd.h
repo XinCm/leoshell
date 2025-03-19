@@ -9,8 +9,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "log.h"
-#include "readline.h"
-#include "history.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #define HISTORY_FILE ".lsh_history"
 
