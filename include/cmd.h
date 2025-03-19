@@ -10,35 +10,9 @@
 #include <sys/wait.h>
 #include "log.h"
 
-
-int cmd_builtin(char** _argv, int argc){
-    if(argc == 2 && (strcmp(_argv[0],"cd") == 0)){
-        chdir(_argv[1]);
-        return 0;
-    } else if(strcmp(_argv[0],"export") == 0){
-        for(int i = 1; i < argc; i++){
-            putenv(_argv[i]);
-        }
-    }
-    return 0;
-}
-
-int cmd_common(char** _argv, int argc){
-    pid_t id = fork();
-    if(strcmp(_argv[0],"ls") == 0){
-        _argv[argc] = "--color";
-        _argv[argc+1] = NULL;
-    }
-
-    if(id == 0){
-        _argv[argc+1] = NULL;
-        execvp(_argv[0],_argv);
-        exit(0);
-    } else if (id > 0) {
-        // 父进程等待子进程结束
-        waitpid(id, NULL, 0);
-    }
-    return 0;
-}
+int path_init();
+int cmd_builtin(char** _argv, int argc);
+int cmd_common(char** _argv, int argc);
+int printf_host_name(void);
 
 #endif

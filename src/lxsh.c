@@ -28,14 +28,7 @@ int split(char* str,char** _argv){
 
     return cnt;
 }
-int printf_host_name(void){
-    char host_name[256];
-    char full_name[512];
-    gethostname(host_name,sizeof(host_name));
-    snprintf(full_name,sizeof(full_name),"%s@%s:%s",getenv("USER"),host_name,getcwd(NULL,0));
-    lprintf(PINK,"%s ",full_name);
-    return 0;
-}
+
 bool string_exists(const char* list[], size_t length, const char* target) {
     for (size_t i = 0; i < length; i++) {
         if (strcmp(list[i], target) == 0) {
@@ -59,6 +52,7 @@ int main(void){
 
     char* _argv[256];
     char *command;
+    path_init();
     while(1){
         printf_host_name();
         fflush(stdout);   //强制刷新缓冲区
