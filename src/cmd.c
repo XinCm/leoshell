@@ -128,12 +128,6 @@ static void call_history(void){
     }
 }
 
-struct cmd_info{
-    char *argv[16];
-    char in[128];
-    char out[128];
-}cmd[16];
-
 static void do_pipe(char** _argv){
     int pipe_num = 0;
     int fd[16][2];  //max 16 pip
@@ -206,7 +200,43 @@ static void do_pipe(char** _argv){
 }
 
 static void do_outre(char** _argv){
+    int redirect_pos = -1;
+    char *output_file = NULL;
 
+    for (int i = 0; _argv[i]; i++) {
+        if (strcmp(_argv[i], ">") == 0) {
+            redirect_pos = i;
+            output_file = _argv[i + 1]; // 获取文件名
+            _argv[i] = NULL;            // 截断参数列表
+            break;
+        }
+    }
+
+    if (redirect_pos != -1 && !output_file) {
+        fprintf(stderr, "Syntax error: no output file after >\n");
+        return;
+    }
+
+    pid_t pid = fork();
+    if (pid == 0) {
+        if (redirect_pos != -1) {
+            int fd = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if (fd == -1) {
+                perror("open");
+                exit(EXIT_FAILURE);
+            }
+            dup2(fd, STDOUT_FILENO); // 重定向标准输出到文件
+            close(fd);
+        }
+
+        execvp(_argv[0], _argv);
+        perror("execvp"); // 如果 execvp 失败
+        exit(EXIT_FAILURE);
+    } else if (pid > 0) {
+        wait(NULL); // 等待子进程结束
+    } else {
+        perror("fork");
+    }
 }
 
 int cmd_builtin(char** _argv, int argc){
