@@ -18,6 +18,6 @@ int misc_init();
 int cmd_builtin(char** _argv, int argc);
 int cmd_common(char** _argv, int argc);
 int printf_host_name(void);
-int split(char* str,char** _argv);
+int prase(char* str,char** _argv);
 void complete_cmd();
 #endif

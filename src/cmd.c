@@ -36,17 +36,67 @@ int misc_init(){
     return 0;
 }
 
-int split(char* str,char** _argv){
-    int cnt = 0;
-    str[strcspn(str, "\n")] = '\0';
-    _argv[0] = strtok(str, DELIM);
-    if (_argv[0] == NULL) {
-        return 0;
+int prase(char* input,char** _argv){
+    int i = 0;
+    int quote_mode = 0; // 0:无引号, 1:双引号, 2:单引号
+    int arg_count = 0;
+    char current_arg[256];
+    int current_arg_len = 0;
+    input[strcspn(input, "\n")] = '\0';
+    // _argv[0] = strtok(str, DELIM);
+    // if (_argv[0] == NULL) {
+    //     return 0;
+    // }
+
+    // while((_argv[++cnt] = strtok(NULL, DELIM)));
+
+    while(input[i] != '\0'){
+        if (quote_mode == 0) {
+            // 普通模式
+            if (input[i] == ' ' || input[i] == '\t') {
+                if (current_arg_len > 0) {
+                    current_arg[current_arg_len] = '\0';
+                    _argv[arg_count] = strdup(current_arg);
+                    arg_count++;
+                    current_arg_len = 0;
+                    if (arg_count >= 32 - 1) break;
+                }
+            } else if (input[i] == '"') {
+                quote_mode = 1; // 进入双引号模式
+            } else if (input[i] == '\'') {
+                quote_mode = 2; // 进入单引号模式
+            } else {
+                current_arg[current_arg_len++] = input[i];
+            }
+        } else if (quote_mode == 1) {
+            // 双引号模式
+            if (input[i] == '"') {
+                quote_mode = 0; // 退出双引号模式
+            } else {
+                current_arg[current_arg_len++] = input[i];
+            }
+        } else if (quote_mode == 2) {
+            // 单引号模式
+            if (input[i] == '\'') {
+                quote_mode = 0; // 退出单引号模式
+            } else {
+                current_arg[current_arg_len++] = input[i];
+            }
+        }
+        i++;
+    }
+    // 处理最后一个参数
+    if (current_arg_len > 0) {
+        current_arg[current_arg_len] = '\0';
+        _argv[arg_count] = strdup(current_arg);
+        arg_count++;
     }
 
-    while((_argv[++cnt] = strtok(NULL, DELIM)));
+    _argv[arg_count] = NULL; // 参数列表以 NULL 结尾
+    return arg_count;
 
-    return cnt;
+
+    // return cnt;
 }
 
 int printf_host_name(void){
@@ -108,7 +158,7 @@ static void call_source(char** _argv, int argc){
 
     while (fgets(line, sizeof(line), fp)) {
         if (line[0] == '#' || strlen(line) < 2) continue; //skip # space
-        split(line,cmd);
+        prase(line,cmd);
 
         if(!cmd_builtin(cmd,argc)){
             cmd_common(cmd,argc);

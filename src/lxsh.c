@@ -67,7 +67,7 @@ int main(void){
         add_history(command);
         write_history(HISTORY_FILE);
 
-        int argc = split(command, _argv);
+        int argc = prase(command, _argv);
         if(!argc)
             continue;
         cmd_handle(_argv,argc);
