@@ -99,16 +99,6 @@ int prase(char* input,char** _argv){
     // return cnt;
 }
 
-int printf_host_name(void){
-    char host_name[256];
-    char full_name[512];
-    gethostname(host_name,sizeof(host_name));
-    snprintf(full_name,sizeof(full_name),"%s@%s:%s",getenv("USER"),host_name,getcwd(NULL,0));
-    lprintf(PINK,"%s ",full_name);
-    return 0;
-}
-
-
 static void call_cd( char **argv, int argc){
     if(argc == 1){
         chdir(home_path);
