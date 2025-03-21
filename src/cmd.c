@@ -6,12 +6,16 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 #include "log.h"
 #include "cmd.h"
 #define MAX_CMD_LEN 1024
 #define DELIM " \t"
 char home_path[128];
 char lash_path[2][128];
+
+int flag_out = 0;
+int flag_in = 0 ;
 int misc_init(){
     memset(lash_path,0,sizeof(lash_path));
 
@@ -124,7 +128,102 @@ static void call_history(void){
     }
 }
 
+struct cmd_info{
+    char *argv[16];
+    char in[128];
+    char out[128];
+}cmd[16];
+
+static void do_pipe(char** _argv){
+    int pipe_num = 0;
+    int fd[16][2];  //max 16 pip
+    char **current_arg = _argv; // 指向当前参数
+
+    while (*current_arg) {
+        if (strcmp(*current_arg, "|") == 0) pipe_num++;
+        current_arg++;
+    }
+    current_arg = _argv; // 重置指针
+
+    if (pipe_num >= 16) {
+        fprintf(stderr, "Error: Too many pipes (max 16)\n");
+        return;
+    }
+
+    // Step 2: 创建管道
+    for (int i = 0; i < pipe_num; i++) {
+        if (pipe(fd[i]) == -1) {
+            perror("pipe");
+            exit(EXIT_FAILURE);
+        }
+    }
+    // Step 3: 创建子进程
+    for (int cnt = 0; cnt <= pipe_num; cnt++) {
+        pid_t pid = fork();
+        if (pid == -1) {
+            perror("fork");
+            exit(EXIT_FAILURE);
+        }
+
+        if (pid == 0) { // 子进程
+            // 重定向输入输出
+            if (cnt > 0) dup2(fd[cnt-1][0], STDIN_FILENO);
+            if (cnt < pipe_num) dup2(fd[cnt][1], STDOUT_FILENO);
+
+            // 关闭所有管道端
+            for (int j = 0; j < pipe_num; j++) {
+                close(fd[j][0]);
+                close(fd[j][1]);
+            }
+
+            // 收集当前命令参数
+            char *cmd_args[16];
+            int arg_count = 0;
+            while (*current_arg && strcmp(*current_arg, "|") != 0) {
+                cmd_args[arg_count++] = *current_arg;
+                current_arg++;
+            }
+            cmd_args[arg_count] = NULL;
+
+            // 执行命令
+            execvp(cmd_args[0], cmd_args);
+            perror("execvp");
+            exit(EXIT_FAILURE);
+        } else { // 父进程
+            // 移动指针到下一个命令
+            while (*current_arg && strcmp(*current_arg, "|") != 0) current_arg++;
+            if (*current_arg) current_arg++;
+        }
+    }
+
+    for (int j = 0; j < pipe_num; j++) {
+        close(fd[j][0]);
+        close(fd[j][1]);
+    }
+    for (int cnt = 0; cnt <= pipe_num; cnt++) {
+        wait(NULL);
+    }
+}
+
+static void do_outre(char** _argv){
+
+}
+
 int cmd_builtin(char** _argv, int argc){
+
+    for(int i = 0; i < argc; i++){
+        if(strcmp(_argv[i],"|") == 0){
+            do_pipe(_argv);
+            return 0;
+        }
+    }
+    for(int i = 0; i < argc; i++){
+        if(strcmp(_argv[i],">") == 0){
+            do_outre(_argv);
+            return 0;
+        }
+    }
+
     if(strcmp(_argv[0],"cd") == 0){
         call_cd(_argv,argc);
         return 0;
